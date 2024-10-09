@@ -8,8 +8,8 @@ REFRESH_ALIVE: 86000
 
 DB_HOST: 127.0.0.1
 DB_PORT: 5432
-DB_USER: universal
-DB_PASSWORD: universal123
+DB_USER: user
+DB_PASSWORD: passwword
 DB_NAME: crypto
 DB_SSLMODE: disable
 
