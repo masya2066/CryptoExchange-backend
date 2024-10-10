@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 )
 
 type AllWallets struct {
@@ -29,13 +30,13 @@ func createWallet(phrase string, typeWallet string) (Wallet, error) {
 	var url string
 	var response createWalletResponse
 	if typeWallet == "eth" {
-		url = "http://localhost:3000/api/create_eth_wallet"
+		url = os.Getenv("CRYPTO_ROUTER_URL") + "/api/create_eth_wallet"
 	}
 	if typeWallet == "trx" {
-		url = "http://localhost:3000/api/create_trx_wallet"
+		url = os.Getenv("CRYPTO_ROUTER_URL") + "/api/create_trx_wallet"
 	}
 	if typeWallet == "btc" {
-		url = "http://localhost:3000/api/create_btc_wallet"
+		url = os.Getenv("CRYPTO_ROUTER_URL") + "/api/create_btc_wallet"
 	}
 
 	data := []byte(`{
