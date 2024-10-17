@@ -50,6 +50,7 @@ func New() (*DB, error) {
 		&models.RejectedToken{},
 		&models.ActionLogs{},
 		&models.UserWallet{},
+		&models.Currency{},
 	); err != nil {
 		return nil, err
 	}

@@ -49,7 +49,7 @@ func (c *Client) RedisAddToArray(tableName string, models interface{}) error {
 		return err
 	}
 
-	return c.Client.Set("auth_tokens", updatedTokensJSON, 0).Err()
+	return c.Client.Set(tableName, updatedTokensJSON, 0).Err()
 }
 
 func (c *Client) RedisGetArray(tableName string) ([]interface{}, error) {

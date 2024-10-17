@@ -6,7 +6,6 @@ import (
 	"crypto-exchange/app/pkg/broker"
 	"crypto-exchange/app/pkg/logger"
 	"fmt"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
@@ -52,6 +51,9 @@ func New(server *gin.Engine, db *db.DB, logger logger.Logger) (*App, error) {
 	app.server.Use(cors.New(config))
 	app.routes()
 
+	go db.RedisUpdateCurrencies(client) // update currencies
+	app.logger.Info("Redis update currencies started!")
+
 	return app, nil
 }
 
@@ -89,6 +91,7 @@ func (a *App) routes() {
 		crypto := route.Group("/crypto")
 		{
 			crypto.GET("/trx/usdt_balance", client.IsAuthorized, a.UsdtTrxBalance)
+			crypto.GET("/currencies", a.Currencies)
 		}
 	}
 }

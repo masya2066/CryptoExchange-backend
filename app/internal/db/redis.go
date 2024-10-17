@@ -2,15 +2,19 @@ package db
 
 import (
 	"crypto-exchange/app/internal/models"
+	"crypto-exchange/app/internal/models/responses"
 	"crypto-exchange/app/pkg/broker"
+	"crypto-exchange/app/pkg/crypto"
 	"crypto-exchange/app/pkg/jwt"
 	"crypto-exchange/app/pkg/logger"
 	"encoding/json"
+	"github.com/go-redis/redis"
 	"time"
 )
 
 const (
 	RedisAuthTokens = "auth_tokens"
+	RedisCurrencies = "currencies"
 )
 
 func (db *DB) RedisSyncAuth(client *broker.Client) error {
@@ -32,8 +36,6 @@ func (db *DB) RedisSyncAuth(client *broker.Client) error {
 }
 
 func (db *DB) RedisUpdateAuth(client *broker.Client) {
-	// Не совсем понятен смысл. Ты забираешь всю таблицу отозванных токенов и проверяешь каждый в
-	// цикле протух ли он. А зачем его проверять если судя по названию это отозванные токены?
 	log := logger.GetLogger().Logger
 	for {
 		var tokens []models.RejectedToken
@@ -66,4 +68,41 @@ func (db *DB) RedisUpdateAuth(client *broker.Client) {
 
 		time.Sleep(5 * time.Minute)
 	}
+}
+
+func (db *DB) RedisUpdateCurrencies(client *broker.Client) {
+
+	for {
+		currencies := crypto.GetAllCurrencies()
+
+		marshalled, err := json.Marshal(currencies)
+		if err != nil {
+			logger.GetLogger().Logger.Errorf("Error marshalling currencies: %v", err)
+			time.Sleep(30 * time.Second)
+			continue
+		}
+
+		if err := client.Client.Set(RedisCurrencies, marshalled, 0).Err(); err != nil {
+			logger.GetLogger().Logger.Errorf("Error setting Redis key: %v", err)
+			time.Sleep(30 * time.Second)
+			continue
+		}
+
+	}
+}
+
+func (db *DB) RedisGetCurrencies(client *broker.Client) ([]responses.Currency, error) {
+	dataJSON, err := client.Client.Get(RedisCurrencies).Bytes()
+	if err != nil && err != redis.Nil {
+		return nil, err
+	}
+
+	var currencies []responses.Currency
+	if len(dataJSON) > 0 {
+		if err := json.Unmarshal(dataJSON, &currencies); err != nil {
+			return nil, err
+		}
+	}
+
+	return currencies, nil
 }

@@ -26,3 +26,13 @@ func (a *App) UsdtTrxBalance(c *gin.Context) {
 	}
 
 }
+
+func (a *App) Currencies(c *gin.Context) {
+
+	currencies, err := a.db.RedisGetCurrencies(a.broker)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+	}
+
+	c.JSON(http.StatusOK, currencies)
+}
