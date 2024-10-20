@@ -4,6 +4,12 @@ type UsdtTrxBalance struct {
 	Balance string `json:"balance"`
 }
 
+type Withdraw struct {
+	Success    bool  `json:"success"`
+	WithdrawID int64 `json:"withdraw_id"`
+	Status     int   `json:"status"`
+}
+
 type Currency struct {
 	ID              string     `json:"id"`
 	Symbol          string     `json:"symbol"`

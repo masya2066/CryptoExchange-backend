@@ -51,6 +51,7 @@ func New() (*DB, error) {
 		&models.ActionLogs{},
 		&models.UserWallet{},
 		&models.Currency{},
+		&models.Withdraw{},
 	); err != nil {
 		return nil, err
 	}

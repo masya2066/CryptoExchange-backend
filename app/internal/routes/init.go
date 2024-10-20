@@ -90,8 +90,8 @@ func (a *App) routes() {
 		}
 		crypto := route.Group("/crypto")
 		{
-			crypto.GET("/trx/usdt_balance", client.IsAuthorized, a.UsdtTrxBalance)
 			crypto.GET("/currencies", a.Currencies)
+			crypto.POST("/withdraw", client.IsAuthorized, a.Withdraw)
 		}
 	}
 }
