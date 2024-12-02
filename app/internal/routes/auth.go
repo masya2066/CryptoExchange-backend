@@ -166,6 +166,8 @@ func (a *App) Register(c *gin.Context) {
 	var ifExist models.User
 	var foundLogin models.User
 
+	user.Login = strings.ToLower(user.Login)
+	user.Email = strings.ToLower(user.Email)
 	if err := a.db.Where("email = ?", user.Email).First(&ifExist); err.Error != nil {
 		a.logger.Errorf("error get user: %v", err.Error)
 	}
@@ -243,6 +245,11 @@ func (a *App) Register(c *gin.Context) {
 		Updated:    timeNow,
 	}); createWalletsErr != nil {
 		c.JSON(http.StatusInternalServerError, models.ResponseMsg(false, language.Language(lang, "db_error"), errorCodes.DBError))
+		return
+	}
+
+	if errCreateExchangeModel := a.db.CreateDefaultExchangeIfNotExists(cuser.ID); errCreateExchangeModel != nil {
+		a.logger.Logger.Errorln("Error create default exchange model:", errCreateExchangeModel)
 		return
 	}
 }

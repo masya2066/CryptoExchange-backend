@@ -93,5 +93,20 @@ func (a *App) routes() {
 			crypto.GET("/currencies", a.Currencies)
 			crypto.POST("/withdraw", client.IsAuthorized, a.Withdraw)
 		}
+		currencies := route.Group("/currencies")
+		{
+			currencies.POST("/prices", a.GetCurrencyPrice)
+		}
+		exchange := route.Group("/exchange")
+		{
+			exchange.POST("/create", client.IsAuthorized, a.Exchange)
+		}
+		balances := route.Group("/balances")
+		{
+			balances.GET("/btc", client.IsAuthorized, a.BtcBalance)
+			balances.GET("/eth", client.IsAuthorized, a.EthBalance)
+			balances.GET("/trx", client.IsAuthorized, a.TrxBalance)
+			balances.GET("/soli", client.IsAuthorized, a.SoliBalance)
+		}
 	}
 }

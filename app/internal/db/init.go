@@ -4,6 +4,7 @@ import (
 	"crypto-exchange/app/internal/models"
 	"crypto-exchange/app/pkg/logger"
 	"crypto-exchange/app/pkg/utils"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -52,6 +53,8 @@ func New() (*DB, error) {
 		&models.UserWallet{},
 		&models.Currency{},
 		&models.Withdraw{},
+		&models.Exchange{},
+		&models.CurrencyPrice{},
 	); err != nil {
 		return nil, err
 	}
@@ -62,6 +65,10 @@ func New() (*DB, error) {
 	errUser := createDefaultUserIfNotExists(db)
 	if errUser != nil {
 		return nil, errUser
+	}
+	errSoliPrice := createSoliPriceIfNotExists(db)
+	if errSoliPrice != nil {
+		return nil, errSoliPrice
 	}
 
 	logger.GetLogger().Info("Database migrated successfully")
@@ -185,6 +192,23 @@ func createDefaultUserIfNotExists(db *gorm.DB) error {
 	if err := tx.Commit(); err.Error != nil {
 		log.Error(err.Error)
 		return tx.Rollback().Error
+	}
+	return nil
+}
+
+func createSoliPriceIfNotExists(db *gorm.DB) error {
+	var found models.CurrencyPrice
+
+	if err := db.Model(&models.CurrencyPrice{}).Where("currency = ?", "soli").First(&found).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			if err := db.Model(&models.CurrencyPrice{}).Create(models.CurrencyPrice{
+				Currency: "soli",
+				UsdPrice: 0.56,
+			}); err != nil {
+				return err.Error
+			}
+		}
+		return err
 	}
 	return nil
 }

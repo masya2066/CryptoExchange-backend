@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"bytes"
+	"crypto-exchange/app/internal/models"
 	"crypto-exchange/app/pkg/generator"
 	"encoding/json"
 	"fmt"
@@ -62,6 +63,8 @@ func createWallet(phrase string, typeWallet string) (Wallet, error) {
 		return Wallet{}, err
 	}
 
+	fmt.Println(string(body))
+
 	if err := json.Unmarshal(body, &response); err != nil {
 		return Wallet{}, err
 	}
@@ -104,4 +107,72 @@ func CreateAllWallets() (AllWallets, error) {
 			SeedPhrase: seedPhrase,
 		},
 	}, nil
+}
+
+func RouterBtcBalance(address string) (models.RouterBalance, error) {
+	data := []byte(`{
+			"address": "` + address + `"
+		}`)
+	req, err := http.NewRequest("POST", os.Getenv("CRYPTO_ROUTER_URL")+"/api/btc_balance", bytes.NewBuffer(data))
+	if err != nil {
+		return models.RouterBalance{}, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return models.RouterBalance{}, err
+	}
+	defer resp.Body.Close()
+	var balance models.RouterBalance
+	if err := json.NewDecoder(resp.Body).Decode(&balance); err != nil {
+		return models.RouterBalance{}, err
+	}
+	return balance, nil
+}
+
+func RouterEthBalance(address string) (models.RouterBalance, error) {
+	fmt.Println(address)
+	data := []byte(`{
+			"address": "` + address + `"
+		}`)
+	req, err := http.NewRequest("POST", os.Getenv("CRYPTO_ROUTER_URL")+"/api/eth_balance", bytes.NewBuffer(data))
+	if err != nil {
+		return models.RouterBalance{}, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return models.RouterBalance{}, err
+	}
+	defer resp.Body.Close()
+	var balance models.RouterBalance
+	if err := json.NewDecoder(resp.Body).Decode(&balance); err != nil {
+		return models.RouterBalance{}, err
+	}
+	return balance, nil
+}
+
+func RouterTrxBalance(address string) (models.RouterBalance, error) {
+	fmt.Println(address)
+	data := []byte(`{
+			"address": "` + address + `"
+		}`)
+	req, err := http.NewRequest("POST", os.Getenv("CRYPTO_ROUTER_URL")+"/api/trc20_balance", bytes.NewBuffer(data))
+	if err != nil {
+		return models.RouterBalance{}, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return models.RouterBalance{}, err
+	}
+	defer resp.Body.Close()
+	var balance models.RouterBalance
+	if err := json.NewDecoder(resp.Body).Decode(&balance); err != nil {
+		return models.RouterBalance{}, err
+	}
+	return balance, nil
 }
